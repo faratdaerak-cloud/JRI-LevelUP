@@ -7,24 +7,14 @@ jobs:
   inspect:
     runs-on: ubuntu-latest
     steps:
-      - name: Download repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Extract project
         run: |
           mkdir extracted
           unzip -q JRI_LevelUP_supabase_connected_v3.zip -d extracted
-          PROJECT_FILE=$(find extracted -name pubspec.yaml -print -quit)
-          if [ -z "$PROJECT_FILE" ]; then
-            echo "Flutter project not found"
-            exit 1
-          fi
-          PROJECT_DIR=$(dirname "$PROJECT_FILE")
-          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
 
-      - name: Find database tables and fields
+      - name: Show database code
         run: |
-          echo "=== SUPABASE REFERENCES ==="
-          grep -RniE "from\\(['\"]|\\.from\\(|tasks|Task" "$PROJECT_DIR/lib" --include='*.dart' | head -250 || true
-          echo "=== SQL FILES ==="
-          find "$PROJECT_DIR" -type f -name '*.sql' -print
+          echo "=== LEVELUP SERVICE ==="
+          cat extracted/lib/services/levelup_service.dart
