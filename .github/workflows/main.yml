@@ -1,54 +1,53 @@
 name: Build JRI LevelUP APK
 
-on:
-workflow_dispatch:
+'on':
+  workflow_dispatch:
 
 jobs:
-build:
-runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-steps:
-  - name: Checkout
-    uses: actions/checkout@v4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-  - name: Extract project
-    run: |
-      mkdir extracted
-      unzip -q JRI_LevelUP_supabase_connected_v3.zip -d extracted
-      PROJECT_FILE=$(find extracted -name pubspec.yaml -print -quit)
-      if [ -z "$PROJECT_FILE" ]; then
-        echo "Flutter project not found"
-        exit 1
-      fi
-      PROJECT_DIR=$(dirname "$PROJECT_FILE")
-      echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
+      - name: Extract project
+        run: |
+          mkdir extracted
+          unzip -q JRI_LevelUP_supabase_connected_v3.zip -d extracted
+          PROJECT_FILE=$(find extracted -name pubspec.yaml -print -quit)
+          if [ -z "$PROJECT_FILE" ]; then
+            echo "Flutter project not found"
+            exit 1
+          fi
+          PROJECT_DIR=$(dirname "$PROJECT_FILE")
+          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
 
-  - name: Setup Java
-    uses: actions/setup-java@v5
-    with:
-      distribution: temurin
-      java-version: '17'
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
 
-  - name: Setup Flutter
-    uses: subosito/flutter-action@v2
-    with:
-      channel: stable
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
 
-  - name: Create Android project files
-    working-directory: ${{ env.PROJECT_DIR }}
-    run: flutter create --platforms=android .
+      - name: Create Android project
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: flutter create --platforms=android .
 
-  - name: Install dependencies
-    working-directory: ${{ env.PROJECT_DIR }}
-    run: flutter pub get
+      - name: Install dependencies
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: flutter pub get
 
-  - name: Build APK
-    working-directory: ${{ env.PROJECT_DIR }}
-    run: flutter build apk --release --verbose
+      - name: Build APK
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: flutter build apk --release
 
-  - name: Upload APK
-    if: success()
-    uses: actions/upload-artifact@v4
-    with:
-      name: JRI-LevelUP-APK
-      path: ${{ env.PROJECT_DIR }}/build/app/outputs/flutter-apk/app-release.apk
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: JRI-LevelUP-APK
+          path: ${{ env.PROJECT_DIR }}/build/app/outputs/flutter-apk/app-release.apk
