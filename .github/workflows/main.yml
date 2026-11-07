@@ -35,16 +35,16 @@ steps:
       channel: stable
 
   - name: Create Android project files
-    run: flutter create --platforms=android .
     working-directory: ${{ env.PROJECT_DIR }}
+    run: flutter create --platforms=android .
 
   - name: Install dependencies
-    run: flutter pub get
     working-directory: ${{ env.PROJECT_DIR }}
+    run: flutter pub get
 
   - name: Build APK
-    run: flutter build apk --release --verbose
     working-directory: ${{ env.PROJECT_DIR }}
+    run: flutter build apk --release --verbose
 
   - name: Upload APK
     if: success()
