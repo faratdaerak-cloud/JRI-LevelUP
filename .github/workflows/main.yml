@@ -1,3 +1,4 @@
+
 name: Build JRI LevelUP APK
 
 'on':
@@ -26,13 +27,7 @@ jobs:
       - name: Fix Flutter code
         working-directory: ${{ env.PROJECT_DIR }}
         run: |
-          if [ ! -f lib/main.dart ]; then
-            echo "ERROR: lib/main.dart not found"
-            exit 1
-          fi
           sed -i 's/runApp(const JriLevelUpApp(/runApp(JriLevelUpApp(/' lib/main.dart
-          echo "Checking corrected code:"
-          grep -n "runApp" lib/main.dart
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -55,7 +50,10 @@ jobs:
 
       - name: Build APK
         working-directory: ${{ env.PROJECT_DIR }}
-        run: flutter build apk --release
+        run: |
+          flutter build apk --release \
+            --dart-define=SUPABASE_URL=https://iurtiywxewmyyjcomuvo.supabase.co \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY=sb_publishable_Gkz4C-eQdMMwe0t23aZQrQ_7BED6--R
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
