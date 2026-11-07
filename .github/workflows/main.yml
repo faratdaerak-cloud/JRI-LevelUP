@@ -1,4 +1,3 @@
-
 name: Build JRI LevelUP APK
 
 'on':
@@ -43,6 +42,13 @@ jobs:
       - name: Create Android project
         working-directory: ${{ env.PROJECT_DIR }}
         run: flutter create --platforms=android .
+
+      - name: Enable Internet permission
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: |
+          FILE=android/app/src/main/AndroidManifest.xml
+          grep -q 'android.permission.INTERNET' "$FILE" || \
+            sed -i '/<manifest[^>]*>/a\    <uses-permission android:name="android.permission.INTERNET" />' "$FILE"
 
       - name: Install dependencies
         working-directory: ${{ env.PROJECT_DIR }}
