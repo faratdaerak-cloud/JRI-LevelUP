@@ -14,9 +14,9 @@ jobs:
           mkdir extracted
           unzip -q JRI_LevelUP_supabase_connected_v3.zip -d extracted
 
-      - name: Show screen code
+      - name: Show remaining screens
         run: |
-          echo "=== HOME SCREEN ==="
-          cat extracted/lib/screens/home_screen.dart
-          echo "=== OTHER SCREENS ==="
-          find extracted/lib/screens -name '*.dart' -type f
+          for f in extracted/lib/screens/goals_screen.dart extracted/lib/screens/diary_screen.dart extracted/lib/screens/progress_screen.dart extracted/lib/screens/profile_screen.dart extracted/lib/screens/ai_screen.dart; do
+            echo "========== $f =========="
+            cat "$f"
+          done
