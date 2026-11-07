@@ -1,4 +1,3 @@
-
 name: Build JRI LevelUP APK
 
 on:
@@ -9,28 +8,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download project
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Extract Flutter project
+      - name: Extract project
         run: |
           mkdir extracted
           unzip -q JRI_LevelUP_supabase_connected_v3.zip -d extracted
-          PROJECT_DIR=$(find extracted -name pubspec.yaml -print -quit | xargs dirname)
-          echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
+          PROJECT_FILE=$(find extracted -name pubspec.yaml -print -quit)
+          if [ -z "$PROJECT_FILE" ]; then
+            echo "Flutter project not found"
+            exit 1
+          fi
+          PROJECT_DIR=$(dirname "$PROJECT_FILE")
+          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
 
-      - name: Install Java
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Install Flutter
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
 
-      - name: Install packages
+      - name: Create Android project files
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: flutter create --platforms=android .
+
+      - name: Install dependencies
         working-directory: ${{ env.PROJECT_DIR }}
         run: flutter pub get
 
@@ -38,7 +46,7 @@ jobs:
         working-directory: ${{ env.PROJECT_DIR }}
         run: flutter build apk --release
 
-      - name: Save APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: JRI-LevelUP-APK
