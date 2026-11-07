@@ -14,7 +14,9 @@ jobs:
           mkdir extracted
           unzip -q JRI_LevelUP_supabase_connected_v3.zip -d extracted
 
-      - name: Show database code
+      - name: Show screen code
         run: |
-          echo "=== LEVELUP SERVICE ==="
-          cat extracted/lib/services/levelup_service.dart
+          echo "=== HOME SCREEN ==="
+          cat extracted/lib/screens/home_screen.dart
+          echo "=== OTHER SCREENS ==="
+          find extracted/lib/screens -name '*.dart' -type f
