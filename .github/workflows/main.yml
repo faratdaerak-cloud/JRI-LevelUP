@@ -1,14 +1,13 @@
-name: Build JRI LevelUP APK
+name: Inspect JRI database
 
 'on':
   workflow_dispatch:
 
 jobs:
-  build:
+  inspect:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
+      - name: Download repository
         uses: actions/checkout@v4
 
       - name: Extract project
@@ -23,46 +22,9 @@ jobs:
           PROJECT_DIR=$(dirname "$PROJECT_FILE")
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
 
-      - name: Fix Flutter code
-        working-directory: ${{ env.PROJECT_DIR }}
+      - name: Find database tables and fields
         run: |
-          sed -i 's/runApp(const JriLevelUpApp(/runApp(JriLevelUpApp(/' lib/main.dart
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-
-      - name: Create Android project
-        working-directory: ${{ env.PROJECT_DIR }}
-        run: flutter create --platforms=android .
-
-      - name: Enable Internet permission
-        working-directory: ${{ env.PROJECT_DIR }}
-        run: |
-          FILE=android/app/src/main/AndroidManifest.xml
-          grep -q 'android.permission.INTERNET' "$FILE" || \
-            sed -i '/<manifest[^>]*>/a\    <uses-permission android:name="android.permission.INTERNET" />' "$FILE"
-
-      - name: Install dependencies
-        working-directory: ${{ env.PROJECT_DIR }}
-        run: flutter pub get
-
-      - name: Build APK
-        working-directory: ${{ env.PROJECT_DIR }}
-        run: |
-          flutter build apk --release \
-            --dart-define=SUPABASE_URL=https://iurtiywxewmyyjcomuvo.supabase.co \
-            --dart-define=SUPABASE_PUBLISHABLE_KEY=sb_publishable_Gkz4C-eQdMMwe0t23aZQrQ_7BED6--R
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: JRI-LevelUP-APK
-          path: ${{ env.PROJECT_DIR }}/build/app/outputs/flutter-apk/app-release.apk
+          echo "=== SUPABASE REFERENCES ==="
+          grep -RniE "from\\(['\"]|\\.from\\(|tasks|Task" "$PROJECT_DIR/lib" --include='*.dart' | head -250 || true
+          echo "=== SQL FILES ==="
+          find "$PROJECT_DIR" -type f -name '*.sql' -print
